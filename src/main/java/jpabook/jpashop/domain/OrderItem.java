@@ -2,7 +2,9 @@ package jpabook.jpashop.domain;
 
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.item.Item;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.aspectj.weaver.ast.Or;
 
@@ -10,6 +12,7 @@ import static jakarta.persistence.FetchType.*;
 
 @Entity
 @Getter@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)//생성자를 protected로 설정한 것과 같은 의미
 public class OrderItem {
     @Id@GeneratedValue
     @Column(name = "order_item_id")
@@ -26,6 +29,9 @@ public class OrderItem {
     private int orderPrice;//주문시 가격
 
     private int count;//주문 수량
+
+//    protected OrderItem() {//해당 방법으로 생성하지 못하도록 막기 위해서 protected사용
+//    }
 
     //생성 메소드
     public static OrderItem createOrderItem(Item item, int orderPrice, int count){
