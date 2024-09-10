@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -58,12 +59,32 @@ public class OrderSimpleApiController {
      */
     @GetMapping("/api/v2/simple-orders")
     public Result ordersV2(){
+        //N + 1 문제 발생
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
         List<SimpleOrderDto> collect = orders.stream()
                 .map(o -> new SimpleOrderDto(o))
                 .collect(Collectors.toList());
         return new Result(collect);
     }
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3(){
+        //fetch 조인을 이용해 N + 1 문제 해결
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+
+        return result;
+    }
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4(){
+        //dto로 바로 조회
+        //v3와의 차이는 v4는 필요로 하는 칼럼의 데이터만 조회한다는 것
+        //성능 에서는 v4가 더 좋지만 재사용성은 v3가 높다.
+        return orderRepository.findOrderDtos();
+    }
+
+
 
     @Data
     @AllArgsConstructor
