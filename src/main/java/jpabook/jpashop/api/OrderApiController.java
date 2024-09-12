@@ -6,6 +6,8 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderFlatDto;
+import jpabook.jpashop.repository.order.query.OrderItemQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryDto;
 import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import lombok.Data;
@@ -18,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,7 +74,27 @@ public class OrderApiController {
         //Dto를 반환하는 방법. N + 1 문제 발생
         return orderQueryRepository.findOrderQueryDtos();
     }
-
+    @GetMapping("api/v5/orders")
+    public List<OrderQueryDto> ordersV5(){
+        //DTO 직접 조회 컬렉션 조회 최적화(in 쿼리 활용)
+        //쿼리 루트 1회, 컬렉션 1회 발생
+        //xToOne 관계들을 먼저 조회, 여기서 얻은 식별자 orderId로 xToMany 관계인 OrderItem을 한꺼번에 조회
+        //Map 을 사용해서 매칭 성능 향상
+        return orderQueryRepository.findAllByDto_optimization();
+    }
+    @GetMapping("api/v6/orders")
+    public List<OrderQueryDto> ordersV6(){
+        //v5의 최적화 버전
+        //쿼리가 1번만 발생
+        //페이징 불가, 데이터의 중복 발생
+        List<OrderFlatDto> flats = orderQueryRepository.findAllByDto_flat();
+        return flats.stream()
+                .collect(groupingBy(o -> new OrderQueryDto(o.getOrderId(), o.getName(), o.getOrderDate(), o.getOrderStatus(), o.getAddress()),
+                        mapping(o -> new OrderItemQueryDto(o.getOrderId(), o.getItemName(), o.getOrderPrice(), o.getCount()), toList())
+                )).entrySet().stream()
+                .map(e -> new OrderQueryDto(e.getKey().getOrderId(), e.getKey().getName(), e.getKey().getOrderDate(), e.getKey().getOrderStatus(), e.getKey().getAddress(), e.getValue()))
+                .collect(toList());
+    }
     @Getter
     static class OrderDto{
         private Long orderId;

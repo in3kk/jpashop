@@ -1,3 +1,4 @@
+
 plugins {
 	java
 	war
@@ -13,6 +14,7 @@ java {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
+
 
 configurations {
 	compileOnly {
@@ -32,6 +34,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-devtools")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5-jakarta")
 	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.1")
+	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+	annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.h2database:h2")
 	annotationProcessor("org.projectlombok:lombok")

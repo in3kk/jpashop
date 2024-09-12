@@ -94,6 +94,14 @@ public class OrderRepository {
         return query.getResultList();
     }
 
+    /**
+     *
+     * QueryDSL
+     */
+    public List<Order> findAll(OrderSearch orderSearch){
+        return null;
+    }
+
     public List<Order> findAllWithMemberDelivery() {
         //fetch 조인 lazy 여도 진짜 값을 처음부터 쿼리해오도록 한다.
         return em.createQuery(
